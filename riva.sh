@@ -10,13 +10,13 @@ MAGENTA='\033[0;35m'
 RESET='\033[0m'
 
 # Иконки для пунктов меню
-ICON_INSTALL="\�\�\ufe0f"
-ICON_UPDATE="\�\�"
-ICON_WALLET="\�\�"
-ICON_STORAGE="\�\�"
-ICON_INFO="\ℹ\ufe0f"
-ICON_FIX="\�\�"
-ICON_DELETE="\�\�\ufe0f"
+ICON_INSTALL="▶️"
+ICON_UPDATE="🔄"
+ICON_WALLET="🔑"
+ICON_STORAGE="💰"
+ICON_INFO="📄"
+ICON_FIX="🛠️"
+ICON_DELETE="🗑️"
 ICON_EXIT="\❌"
 
 # Функции для рисования границ
