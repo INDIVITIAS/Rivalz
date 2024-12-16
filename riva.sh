@@ -177,7 +177,7 @@ draw_bottom_border() {
 # Главное меню
 # ----------------------------
 show_menu() {
-    clear
+    
     draw_top_border
     echo -e "    ${YELLOW}Выберите действие:${RESET}"
     draw_middle_border
