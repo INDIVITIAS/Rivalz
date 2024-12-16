@@ -58,7 +58,6 @@ display_ascii() {
     echo -e "${YELLOW}Купи мне крипто бутылочку... кефира 😏${RESET} ${MAGENTA} 👉  https://bit.ly/4eBbfIr  👈 ${MAGENTA}"
     echo -e ""
 }
-
 # ----------------------------
 # Установка Docker и Docker Compose
 # ----------------------------
@@ -140,8 +139,6 @@ restart_node() {
 view_logs() {
     echo -e "${LOGS} Просмотр последних 30 логов ноды Rivalz...${RESET}"
     docker-compose logs --tail 30
-#    echo -e "${LOGS} Просмотр логов в реальном времени... Нажмите Ctrl+C для остановки.${RESET}"
-#    docker-compose logs -f
     read -p "Нажмите Enter, чтобы вернуться в главное меню..."
 }
 
@@ -181,16 +178,15 @@ draw_bottom_border() {
 # ----------------------------
 show_menu() {
     clear
-    display_ascii
     draw_top_border
     echo -e "    ${YELLOW}Выберите действие:${RESET}"
     draw_middle_border
-    echo -e "    ${CYAN}1.${RESET} ${INSTALL} Установить ноду Rivalz"
-    echo -e "    ${CYAN}2.${RESET} ${INFO} Просмотреть ID ноды и конфигурацию"
-    echo -e "    ${CYAN}3.${RESET} ${STOP} Остановить ноду Rivalz"
-    echo -e "    ${CYAN}4.${RESET} ${RESTART} Перезапустить ноду Rivalz"
-    echo -e "    ${CYAN}5.${RESET} ${LOGS} Просмотреть логи ноды Rivalz"
-    echo -e "    ${CYAN}6.${RESET} ${EXIT} Выйти"
+    echo -e "    ${CYAN}1.${RESET} ${ICON_INSTALL} Установить ноду Rivalz"
+    echo -e "    ${CYAN}2.${RESET} ${ICON_INFO} Просмотреть ID ноды и конфигурацию"
+    echo -e "    ${CYAN}3.${RESET} ${ICON_STOP} Остановить ноду Rivalz"
+    echo -e "    ${CYAN}4.${RESET} ${ICON_RESTART} Перезапустить ноду Rivalz"
+    echo -e "    ${CYAN}5.${RESET} ${ICON_LOGS} Просмотреть логи ноды Rivalz"
+    echo -e "    ${CYAN}6.${RESET} ${ICON_EXIT} Выйти"
     draw_bottom_border
     echo -ne "${YELLOW}Введите ваш выбор [1-6]: ${RESET}"
 }
@@ -218,7 +214,7 @@ while true; do
             view_logs
             ;;
         6)
-            echo -e "${EXIT} Выход...${RESET}"
+            echo -e "${ICON_EXIT} Выход...${RESET}"
             exit 0
             ;;
         *)
