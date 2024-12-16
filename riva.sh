@@ -83,12 +83,6 @@ install_node() {
     read -p "Введите объем RAM (например, 4G): " RAM
     read -p "Введите размер диска DISK_SIZE (например, 10G): " DISK_SIZE
 
-    # Проверка на существование файла .env
-    if [ -f .env ]; then
-        echo -e "${ERROR} Файл .env уже существует. Для перезаписи удалите старый файл.${RESET}"
-        exit 1
-    fi
-
     # Создание файла .env
     cat > .env <<EOL
 WALLET_ADDRESS=${WALLET_ADDRESS}
@@ -166,6 +160,7 @@ show_menu() {
 
 # Главный цикл
 while true; do
+    display_ascii  # Добавим отображение ASCII-арт в главный цикл
     show_menu
     read choice
     case $choice in
