@@ -18,6 +18,15 @@ ICON_INFO="📄"
 ICON_FIX="🛠️"
 ICON_DELETE="🗑️"
 ICON_EXIT="\❌"
+CHECKMARK="✅"
+ERROR="❌"
+PROGRESS="⏳"
+INSTALL="🛠️"
+STOP="⏹️"
+RESTART="🔄"
+LOGS="📄"
+EXIT="🚪"
+INFO="ℹ️"
 
 # Функции для рисования границ
 draw_top_border() {
@@ -50,97 +59,174 @@ display_ascii() {
     echo -e ""
 }
 
-# Отображение меню
-show_menu() {
-    clear
-    draw_top_border
-    display_ascii
-    draw_middle_border
-    print_telegram_icon
-    echo -e "    ${BLUE}Криптан, подпишись!: ${YELLOW}https://t.me/indivitias${RESET}"
-    draw_middle_border
+Исправил перевод на "нода" вместо "узел":  
 
-    echo -e "    ${YELLOW}Пожалуйста, выберите опцию:${RESET}"
-    echo
-    echo -e "    ${CYAN}1.${RESET} ${ICON_INSTALL} Установить ноду Rivalz"
-    echo -e "    ${CYAN}2.${RESET} ${ICON_UPDATE} Обновить ноду"
-    echo -e "    ${CYAN}3.${RESET} ${ICON_WALLET} Поменять кошелек"
-    echo -e "    ${CYAN}4.${RESET} ${ICON_STORAGE} Поменять потребляемое кол-во места диска"
-    echo -e "    ${CYAN}5.${RESET} ${ICON_INFO} Информация о ноде"
-    echo -e "    ${CYAN}6.${RESET} ${ICON_FIX} Исправить ошибку Running on another..."
-    echo -e "    ${CYAN}7.${RESET} ${ICON_DELETE} Удалить ноду"
-    echo -e "    ${CYAN}8.${RESET} ${ICON_EXIT} Выйти из скрипта"
-    draw_bottom_border
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════╗${RESET}"
-    echo -e "${CYAN}║${RESET}              ${YELLOW}Введите свой выбор [1-8]:${RESET}           ${CYAN}║${RESET}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════╝${RESET}"
-    read -p " " choice
+```bash
+# ----------------------------
+# Установка Docker и Docker Compose
+# ----------------------------
+install_docker() {
+    echo -e "${INSTALL} Установка Docker и Docker Compose...${RESET}"
+    sudo apt update && sudo apt upgrade -y
+    if ! command -v docker &> /dev/null; then
+        sudo apt install docker.io -y
+        sudo systemctl start docker
+        sudo systemctl enable docker
+    fi
+    if ! command -v docker-compose &> /dev/null; then
+        sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+    fi
+    echo -e "${CHECKMARK} Docker и Docker Compose успешно установлены.${RESET}"
 }
 
-# Основное меню
+# ----------------------------
+# Установка ноды Rivalz
+# ----------------------------
+install_node() {
+    echo -e "${INSTALL} Установка ноды Rivalz...${RESET}"
+    install_docker
+
+    # Запрос данных для конфигурации
+    echo -e "${INFO} Пожалуйста, укажите следующие данные для конфигурации:${RESET}"
+    read -p "Введите ваш WALLET_ADDRESS: " WALLET_ADDRESS
+    read -p "Введите количество CPU_CORES: " CPU_CORES
+    read -p "Введите объем RAM (например, 4G): " RAM
+    read -p "Введите размер диска DISK_SIZE (например, 10G): " DISK_SIZE
+
+    # Создание файла .env
+    cat > .env <<EOL
+WALLET_ADDRESS=${WALLET_ADDRESS}
+CPU_CORES=${CPU_CORES}
+RAM=${RAM}
+DISK_SIZE=${DISK_SIZE}
+EOL
+
+    echo -e "${CHECKMARK} Файл .env создан с указанной конфигурацией.${RESET}"
+
+    # Проверка на наличие файла docker-compose.yml
+    if [ ! -f docker-compose.yml ]; then
+        echo -e "${ERROR} Файл docker-compose.yml не найден. Убедитесь, что он находится в текущей директории.${RESET}"
+        exit 1
+    fi
+
+    # Сборка и запуск контейнеров
+    docker-compose up -d --build
+    echo -e "${CHECKMARK} Нода Rivalz установлена и запущена.${RESET}"
+    read -p "Нажмите Enter, чтобы вернуться в главное меню..."
+}
+
+# ----------------------------
+# Остановка ноды Rivalz
+# ----------------------------
+stop_node() {
+    echo -e "${STOP} Остановка ноды Rivalz...${RESET}"
+    docker-compose down
+    echo -e "${CHECKMARK} Нода Rivalz остановлена.${RESET}"
+    read -p "Нажмите Enter, чтобы вернуться в главное меню..."
+}
+
+# ----------------------------
+# Перезапуск ноды Rivalz
+# ----------------------------
+restart_node() {
+    echo -e "${RESTART} Перезапуск ноды Rivalz...${RESET}"
+    docker-compose down
+    docker-compose up -d
+    echo -e "${CHECKMARK} Нода Rivalz успешно перезапущена.${RESET}"
+    read -p "Нажмите Enter, чтобы вернуться в главное меню..."
+}
+
+# ----------------------------
+# Просмотр логов ноды Rivalz
+# ----------------------------
+view_logs() {
+    echo -e "${LOGS} Просмотр последних 30 логов ноды Rivalz...${RESET}"
+    docker-compose logs --tail 30
+#    echo -e "${LOGS} Просмотр логов в реальном времени... Нажмите Ctrl+C для остановки.${RESET}"
+#    docker-compose logs -f
+    read -p "Нажмите Enter, чтобы вернуться в главное меню..."
+}
+
+# ----------------------------
+# Просмотр ID ноды и данных .env
+# ----------------------------
+display_id_env() {
+    echo -e "${INFO} Отображение ID ноды и данных конфигурации...${RESET}"
+    echo -e "${GREEN}ℹ️  ID ноды:${RESET}"
+    cat /etc/machine-id
+    echo -e "${GREEN}\nℹ️  Конфигурация .env:${RESET}"
+    if [ -f .env ]; then
+        cat .env
+    else
+        echo -e "${ERROR} Файл .env не найден.${RESET}"
+    fi
+    read -p "Нажмите Enter, чтобы вернуться в главное меню..."
+}
+
+# ----------------------------
+# Отрисовка рамок меню
+# ----------------------------
+draw_top_border() {
+    echo -e "${CYAN}╔══════════════════════════════════════════════════════╗${RESET}"
+}
+
+draw_middle_border() {
+    echo -e "${CYAN}╠══════════════════════════════════════════════════════╣${RESET}"
+}
+
+draw_bottom_border() {
+    echo -e "${CYAN}╚══════════════════════════════════════════════════════╝${RESET}"
+}
+
+# ----------------------------
+# Главное меню
+# ----------------------------
+show_menu() {
+    clear
+    display_ascii
+    draw_top_border
+    echo -e "    ${YELLOW}Выберите действие:${RESET}"
+    draw_middle_border
+    echo -e "    ${CYAN}1.${RESET} ${INSTALL} Установить ноду Rivalz"
+    echo -e "    ${CYAN}2.${RESET} ${INFO} Просмотреть ID ноды и конфигурацию"
+    echo -e "    ${CYAN}3.${RESET} ${STOP} Остановить ноду Rivalz"
+    echo -e "    ${CYAN}4.${RESET} ${RESTART} Перезапустить ноду Rivalz"
+    echo -e "    ${CYAN}5.${RESET} ${LOGS} Просмотреть логи ноды Rivalz"
+    echo -e "    ${CYAN}6.${RESET} ${EXIT} Выйти"
+    draw_bottom_border
+    echo -ne "${YELLOW}Введите ваш выбор [1-6]: ${RESET}"
+}
+
+# ----------------------------
+# Главный цикл
+# ----------------------------
 while true; do
     show_menu
+    read -r choice
     case $choice in
         1)
-            echo "Начинаю установку ноды..."
-            echo "Происходит обновление пакетов..."
-            if sudo apt update && sudo apt upgrade -y; then
-                echo "Обновление пакетов: Успешно"
-            else
-                echo "Обновление пакетов: Ошибка"
-                exit 1
-            fi
-
-            echo "Установка screen..."
-            if sudo apt-get install screen -y; then
-                echo "Установка screen: Успешно"
-            else
-                echo "Установка screen: Ошибка"
-                exit 1
-            fi
-
-            echo "Скачиваем Node.Js..."
-            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-            if sudo apt install -y nodejs; then
-                echo "Устанвока Node.Js: Успешно"
-            else
-                echo "Установка Node.Js: Ошибка"
-                exit 1
-            fi
-
-            echo "Установка ноды Rivalz..."
-            npm i -g rivalz-node-cli
-
-            rivalz run
+            install_node
             ;;
         2)
-            npm i -g rivalz-node-cli@2.6.2
-            rivalz run
+            display_id_env
             ;;
         3)
-            rivalz change-wallet
+            stop_node
             ;;
         4)
-            rivalz change-hardware-config
+            restart_node
             ;;
         5)
-            rivalz info
+            view_logs
             ;;
         6)
-            echo "Начинаю делать исправление..."
-            rm -f /etc/machine-id
-            dbus-uuidgen --ensure=/etc/machine-id
-            cp /etc/machine-id /var/lib/dbus/machine-id
-            echo "Готово!"
-            ;;
-        7)
-            sudo npm uninstall -g rivalz-node-cli
-            ;;
-        8)
+            echo -e "${EXIT} Выход...${RESET}"
             exit 0
             ;;
         *)
-            echo "Неверная пункт. Пожалуйста, выберите правильную цифру в меню."
+            echo -e "${ERROR} Неверный выбор. Попробуйте снова.${RESET}"
+            read -p "Нажмите Enter, чтобы продолжить..."
             ;;
     esac
 done
