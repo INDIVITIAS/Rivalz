@@ -41,10 +41,6 @@ draw_bottom_border() {
     echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════════╝${RESET}"
 }
 
-print_telegram_icon() {
-    echo -e "          ${MAGENTA}🚀 Подписывайтесь на наш Telegram!${RESET}"
-}
-
 # Логотип и информация
 display_ascii() {
     echo -e "${CYAN}   ____   _  __   ___    ____ _   __   ____ ______   ____   ___    ____${RESET}"
@@ -155,7 +151,6 @@ display_id_env() {
 
 # Главное меню
 show_menu() {
-    
     draw_top_border
     echo -e "    ${YELLOW}Выберите действие:${RESET}"
     draw_middle_border
