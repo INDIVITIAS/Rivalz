@@ -1,4 +1,3 @@
-```javascript
 const pty = require("node-pty");
 
 const os = require("os");
@@ -64,4 +63,3 @@ ptyProcess.on("exit", function (code, signal) {
     `Процесс завершился с кодом ${code} и сигналом ${signal}.`
   );
 });
-```
