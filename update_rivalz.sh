@@ -10,66 +10,67 @@ MAGENTA='\033[0;35m'
 RESET='\033[0m'
 
 # Иконки для пунктов меню
-ICON_UPDATE="🔄"
 CHECKMARK="✅"
 ICON_ERROR="❌"
 ICON_PROGRESS="⏳"
+ICON_UPDATE="🔄"
+
+# Функция для рисования границ
+draw_top_border() {
+    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════════╗${RESET}"
+}
+
+draw_bottom_border() {
+    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════════╝${RESET}"
+}
+
+# Логотип и информация
+display_ascii() {
+    echo -e "${CYAN}   ____   _  __   ___    ____ _   __   ____ ______   ____   ___    ____${RESET}"
+    echo -e "${CYAN}  /  _/  / |/ /  / _ \\  /  _/| | / /  /  _//_  __/  /  _/  / _ |  / __/${RESET}"
+    echo -e "${CYAN} _/ /   /    /  / // / _/ /  | |/ /  _/ /   / /    _/ /   / __ | _\\ \\  ${RESET}"
+    echo -e "${CYAN}/___/  /_/|_/  /____/ /___/  |___/  /___/  /_/    /___/  /_/ |_|/___/  ${RESET}"
+    echo -e ""
+    echo -e "${YELLOW}Подписывайтесь на Telegram: https://t.me/CryptalikBTC${RESET}"
+    echo -e "${YELLOW}Подписывайтесь на YouTube: https://www.youtube.com/@Cryptalik${RESET}"
+    echo -e "${YELLOW}Здесь про аирдропы и ноды: https://t.me/indivitias${RESET}"
+    echo -e "${YELLOW}Купи мне крипто бутылочку... кефира 😏${RESET} ${MAGENTA} 👉  https://bit.ly/4eBbfIr  👈 ${MAGENTA}"
+    echo -e ""
+}
 
 # Функция для обновления ноды
 update_node() {
-    echo -e "${ICON_PROGRESS} Начинаем обновление ноды Rivalz до версии 3.0.1..."
+    echo -e "${ICON_UPDATE} Обновление ноды Rivalz...${RESET}"
+
+    # Переход в директорию Rivalz
+    if [ ! -d "Rivalz" ]; then
+        echo -e "${ICON_ERROR} Директория Rivalz не найдена. Убедитесь, что нода установлена в директории Rivalz.${RESET}"
+        exit 1
+    fi
+    cd Rivalz
 
     # Остановка текущего контейнера
-    echo -e "${ICON_PROGRESS} Останавливаем текущий контейнер..."
-    docker-compose down
+    echo -e "${ICON_PROGRESS} Остановка текущего контейнера...${RESET}"
+    docker-compose down || echo -e "${ICON_ERROR} Не удалось остановить контейнер. Возможно, он уже остановлен.${RESET}"
 
     # Обновление rivalz-node-cli
-    echo -e "${ICON_PROGRESS} Обновляем rivalz-node-cli до версии 3.0.1..."
-    docker run --rm -v /usr/local/lib/node_modules:/usr/local/lib/node_modules node:18 npm install -g rivalz-node-cli@3.0.1
+    echo -e "${ICON_PROGRESS} Обновление rivalz-node-cli до версии 3.0.1...${RESET}"
+    docker run --rm -v $(pwd):/app -w /app node:18 npm i -g rivalz-node-cli@3.0.1
 
-    if [ $? -eq 0 ]; then
-        echo -e "${CHECKMARK} rivalz-node-cli успешно обновлен до версии 3.0.1."
-    else
-        echo -e "${ICON_ERROR} Ошибка при обновлении rivalz-node-cli."
-        exit 1
-    fi
+    # Запуск команды change-hardware-config
+    echo -e "${ICON_PROGRESS} Настройка конфигурации оборудования...${RESET}"
+    rivalz-node-cli change-hardware-config
 
-    # Пересборка и запуск контейнера
-    echo -e "${ICON_PROGRESS} Пересобираем и запускаем контейнер..."
-    docker-compose up -d --build
+    # Перезапуск ноды
+    echo -e "${ICON_PROGRESS} Перезапуск ноды...${RESET}"
+    docker-compose up -d
 
-    if [ $? -eq 0 ]; then
-        echo -e "${CHECKMARK} Нода Rivalz успешно обновлена и запущена."
-    else
-        echo -e "${ICON_ERROR} Ошибка при перезапуске контейнера."
-        exit 1
-    fi
-
-    # Проверка версии
-    echo -e "${ICON_PROGRESS} Проверяем версию ноды..."
-    docker exec rivalz rivalz --version
-
-    echo -e "${GREEN}Обновление завершено!${RESET}"
+    echo -e "${CHECKMARK} Нода Rivalz успешно обновлена.${RESET}"
+    echo -e "${GREEN}Теперь вы можете использовать старый скрипт для управления нодой.${RESET}"
 }
 
-# Главное меню
-show_menu() {
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════════════╗${RESET}"
-    echo -e "${CYAN}║                        ${YELLOW}Меню обновления ноды Rivalz${CYAN}                        ║${RESET}"
-    echo -e "${CYAN}╠══════════════════════════════════════════════════════════════════════╣${RESET}"
-    echo -e "${CYAN}║   ${YELLOW}1.${RESET} ${ICON_UPDATE} Обновить ноду Rivalz до версии 3.0.1                        ║${RESET}"
-    echo -e "${CYAN}║   ${YELLOW}2.${RESET} Выйти в главное меню                                           ║${RESET}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════════════╝${RESET}"
-    echo -ne "${YELLOW}Введите ваш выбор [1-2]: ${RESET}"
-}
-
-# Главный цикл
-while true; do
-    show_menu
-    read choice
-    case $choice in
-        1) update_node ;;
-        2) break ;;
-        *) echo -e "${ICON_ERROR} Неверный выбор, попробуйте снова.${RESET}" ;;
-    esac
-done
+# Основной код
+draw_top_border
+display_ascii
+update_node
+draw_bottom_border
